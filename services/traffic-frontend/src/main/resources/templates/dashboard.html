@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infinity Traffic Control Center</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <script defer th:src="@{/js/dashboard.js}"></script>
+</head>
+<body>
+<div class="ambient" aria-hidden="true">
+    <div class="blob blob-a"></div>
+    <div class="blob blob-b"></div>
+    <div class="blob blob-c"></div>
+</div>
+
+<main class="layout" th:attr="data-api-path=${gatewayBaseUrl}">
+    <header class="hero" data-reveal>
+        <div>
+            <p class="eyebrow">REAL-TIME TRAFFIC MSA</p>
+            <h1>Infinity Traffic Control Center</h1>
+            <p class="hero-desc">Kotlin + Spring Boot + Kafka 기반으로 실시간 도로 혼잡도를 모니터링하고, 이벤트를 즉시 수집/조회합니다.</p>
+        </div>
+        <div class="hero-meta">
+            <div class="meta-chip">
+                <span class="meta-label">Gateway</span>
+                <strong>api-gateway :8080</strong>
+            </div>
+            <div class="meta-chip">
+                <span class="meta-label">Frontend</span>
+                <strong>traffic-frontend :8084</strong>
+            </div>
+        </div>
+    </header>
+
+    <section class="flash-stack">
+        <div class="flash success" th:if="${successMessage}" th:text="${successMessage}"></div>
+        <div class="flash error" th:if="${errorMessage}" th:text="${errorMessage}"></div>
+    </section>
+
+    <section class="grid">
+        <article class="panel kpi-panel" data-reveal>
+            <div class="panel-title-row">
+                <h2>운영 KPI</h2>
+                <p id="generated-at" th:text="${summary.generatedAt}">-</p>
+            </div>
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <p class="kpi-label">총 이벤트 수</p>
+                    <p class="kpi-value" id="kpi-total-events" th:text="${summary.totalEvents}">0</p>
+                </div>
+                <div class="kpi-card">
+                    <p class="kpi-label">평균 속도(km/h)</p>
+                    <p class="kpi-value" id="kpi-average-speed">-</p>
+                </div>
+                <div class="kpi-card">
+                    <p class="kpi-label">최고 혼잡도</p>
+                    <p class="kpi-value" id="kpi-max-congestion">-</p>
+                </div>
+                <div class="kpi-card">
+                    <p class="kpi-label">로그인 사용자</p>
+                    <p class="kpi-value" id="kpi-user" th:text="${authenticated} ? ${username} : '익명 모드'">익명 모드</p>
+                </div>
+            </div>
+        </article>
+
+        <article class="panel auth-panel" data-reveal>
+            <h2>인증 센터</h2>
+
+            <div class="auth-state" th:if="${authenticated}">
+                <p><strong th:text="${username}">user</strong> 님이 로그인 중입니다.</p>
+                <p class="muted">토큰 만료: <span th:text="${tokenExpiresAt}">-</span></p>
+                <form method="post" th:action="@{/auth/logout}">
+                    <button type="submit" class="btn secondary">로그아웃</button>
+                </form>
+            </div>
+
+            <div th:if="${!authenticated}">
+                <form class="stack-form" method="post" th:action="@{/auth/register}" th:object="${registerForm}">
+                    <h3>회원가입</h3>
+                    <label>아이디
+                        <input type="text" th:field="*{username}" placeholder="traffic_operator">
+                    </label>
+                    <label>비밀번호
+                        <input type="password" th:field="*{password}" placeholder="최소 8자 이상">
+                    </label>
+                    <button type="submit" class="btn">회원가입</button>
+                </form>
+
+                <form class="stack-form" method="post" th:action="@{/auth/login}" th:object="${loginForm}">
+                    <h3>로그인</h3>
+                    <label>아이디
+                        <input type="text" th:field="*{username}" placeholder="traffic_operator">
+                    </label>
+                    <label>비밀번호
+                        <input type="password" th:field="*{password}" placeholder="비밀번호">
+                    </label>
+                    <button type="submit" class="btn">로그인</button>
+                </form>
+            </div>
+        </article>
+
+        <article class="panel ingest-panel" data-reveal>
+            <h2>이벤트 수집</h2>
+            <form class="stack-form" method="post" th:action="@{/traffic/events}" th:object="${trafficEventForm}">
+                <label>지역
+                    <select th:field="*{region}">
+                        <option value="SEOUL">SEOUL</option>
+                        <option value="BUSAN">BUSAN</option>
+                        <option value="INCHEON">INCHEON</option>
+                        <option value="DAEJEON">DAEJEON</option>
+                        <option value="GWANGJU">GWANGJU</option>
+                    </select>
+                </label>
+                <label>도로명
+                    <input type="text" th:field="*{roadName}" placeholder="Gangnam-daero 123">
+                </label>
+                <label>평균 속도 (km/h)
+                    <input type="number" th:field="*{averageSpeedKph}" min="0" max="200">
+                </label>
+                <label>혼잡도 (1~5)
+                    <input type="number" th:field="*{congestionLevel}" min="1" max="5">
+                </label>
+                <button type="submit" class="btn">이벤트 적재</button>
+            </form>
+        </article>
+
+        <article class="panel summary-panel" data-reveal>
+            <div class="panel-title-row">
+                <h2>지역별 요약</h2>
+                <div class="inline-controls">
+                    <label>지역 필터
+                        <select id="region-filter" th:value="${selectedRegion}">
+                            <option th:each="regionOption : ${regions}"
+                                    th:value="${regionOption}"
+                                    th:text="${regionOption}"
+                                    th:selected="${regionOption == selectedRegion}"></option>
+                        </select>
+                    </label>
+                    <button id="refresh-dashboard" type="button" class="btn secondary">즉시 새로고침</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table id="summary-table">
+                    <thead>
+                    <tr>
+                        <th>Region</th>
+                        <th>Total Events</th>
+                        <th>Avg Speed</th>
+                        <th>Congestion</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(summary.regions)}">
+                        <td colspan="4" class="empty">표시할 데이터가 없습니다.</td>
+                    </tr>
+                    <tr th:each="regionSummary : ${summary.regions}" data-row-animate>
+                        <td th:text="${regionSummary.region}">SEOUL</td>
+                        <td th:text="${regionSummary.totalEvents}">0</td>
+                        <td th:text="${#numbers.formatDecimal(regionSummary.averageSpeedKph, 1, 1)}">0.0</td>
+                        <td>
+                            <span class="congestion" th:classappend="' level-' + ${regionSummary.latestCongestionLevel}"
+                                  th:text="${regionSummary.latestCongestionLevel}">3</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="panel recent-panel" data-reveal>
+            <div class="panel-title-row">
+                <h2>최근 이벤트</h2>
+                <label>조회 개수
+                    <input id="limit-filter" type="number" min="5" max="100" th:value="${limit}">
+                </label>
+            </div>
+
+            <div class="table-wrap">
+                <table id="recent-table">
+                    <thead>
+                    <tr>
+                        <th>Observed At</th>
+                        <th>Region</th>
+                        <th>Road</th>
+                        <th>Speed</th>
+                        <th>Congestion</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:if="${#lists.isEmpty(recentEvents)}">
+                        <td colspan="5" class="empty">최근 이벤트가 없습니다.</td>
+                    </tr>
+                    <tr th:each="event : ${recentEvents}" data-row-animate>
+                        <td th:text="${event.observedAt}">2026-02-09T00:00:00Z</td>
+                        <td th:text="${event.region}">SEOUL</td>
+                        <td th:text="${event.roadName}">Gangnam-daero</td>
+                        <td th:text="${event.averageSpeedKph}">50</td>
+                        <td>
+                            <span class="congestion" th:classappend="' level-' + ${event.congestionLevel}"
+                                  th:text="${event.congestionLevel}">3</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+</main>
+</body>
+</html>

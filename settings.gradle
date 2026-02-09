@@ -5,9 +5,11 @@ include 'api-gateway'
 include 'auth-service'
 include 'traffic-command-service'
 include 'traffic-query-service'
+include 'traffic-frontend'
 
 project(':shared-kernel').projectDir = file('libs/shared-kernel')
 project(':api-gateway').projectDir = file('services/api-gateway')
 project(':auth-service').projectDir = file('services/auth-service')
 project(':traffic-command-service').projectDir = file('services/traffic-command-service')
 project(':traffic-query-service').projectDir = file('services/traffic-query-service')
+project(':traffic-frontend').projectDir = file('services/traffic-frontend')

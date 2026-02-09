@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: traffic-frontend
+  thymeleaf:
+    cache: false
+
+server:
+  port: 8084
+
+frontend:
+  gateway:
+    base-url: ${GATEWAY_BASE_URL:http://localhost:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
