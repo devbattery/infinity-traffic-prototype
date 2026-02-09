@@ -38,3 +38,7 @@ out/
 
 ### Kotlin ###
 .kotlin
+
+### Local runtime artifacts ###
+.runtime/
+performance/results/
