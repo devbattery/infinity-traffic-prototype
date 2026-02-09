@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: traffic-query-service
+  datasource:
+    url: ${QUERY_DATASOURCE_URL:jdbc:h2:mem:querydb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${QUERY_DATASOURCE_USERNAME:sa}
+    password: ${QUERY_DATASOURCE_PASSWORD:}
+    driver-class-name: ${QUERY_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: ${TRAFFIC_QUERY_CONSUMER_GROUP:traffic-query-service}
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.value.default.type: com.devbattery.infinitytraffic.shared.contract.TrafficEventMessage
+
+server:
+  port: 8083
+
+traffic:
+  kafka:
+    topic: ${TRAFFIC_EVENTS_TOPIC:traffic.events.v1}
+    group-id: ${TRAFFIC_QUERY_CONSUMER_GROUP:traffic-query-service}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true

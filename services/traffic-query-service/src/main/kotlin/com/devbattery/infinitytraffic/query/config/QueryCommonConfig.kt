@@ -1,0 +1,16 @@
+package com.devbattery.infinitytraffic.query.config
+
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import java.time.Clock
+
+/**
+ * 쿼리 서비스 공통 빈을 설정한다.
+ */
+@Configuration
+class QueryCommonConfig {
+
+    // 이벤트 처리 시각 계산에 사용할 시스템 시계를 제공한다.
+    @Bean
+    fun clock(): Clock = Clock.systemUTC()
+}
