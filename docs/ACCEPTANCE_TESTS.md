@@ -33,3 +33,11 @@
   1. MockWebServer로 다운스트림(Auth/Query) 대역 구성
   2. 게이트웨이 API 호출
   3. 다운스트림 경로/Trace ID 전달 검증
+
+## 5) 타임리프 프론트엔드
+
+- 파일: `services/traffic-frontend/src/test/kotlin/com/devbattery/infinitytraffic/frontend/acceptance/TrafficFrontendAcceptanceTest.kt`
+- 시나리오:
+  1. 대시보드 페이지 렌더링 시 게이트웨이 요약/최근 이벤트 호출 검증
+  2. 로그인 폼 처리 후 세션 기반 Ajax 스냅샷 응답 검증
+  3. 경로 기반 Dispatcher로 실무형 다운스트림 모킹 안정성 확보

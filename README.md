@@ -6,12 +6,14 @@
 - 인증: `auth-service`
 - 쓰기(CQRS Command): `traffic-command-service`
 - 읽기(CQRS Query): `traffic-query-service`
+- 운영 대시보드(Thymeleaf): `traffic-frontend`
 - 공통 계약/추적: `shared-kernel`
 
 상세 구현 순서(A→Z)와 동작 원리는 아래 문서를 확인하세요.
 
 - [A부터 Z까지 구현/작동 방식](docs/IMPLEMENTATION_A_TO_Z.md)
 - [인수 테스트 시나리오](docs/ACCEPTANCE_TESTS.md)
+- [k6 부하 테스트 리포트](docs/performance/K6_REPORT.md)
 
 ## 빠른 시작
 
@@ -35,6 +37,7 @@ docker compose up -d
 ./gradlew :auth-service:bootRun
 ./gradlew :traffic-command-service:bootRun
 ./gradlew :traffic-query-service:bootRun
+./gradlew :traffic-frontend:bootRun
 ```
 
 ## 포트
@@ -43,6 +46,13 @@ docker compose up -d
 - `auth-service`: `8081`
 - `traffic-command-service`: `8082`
 - `traffic-query-service`: `8083`
+- `traffic-frontend`: `8084`
 - `kafka-ui`: `9090`
 - `prometheus`: `9091`
 - `grafana`: `3000`
+
+## k6 부하 테스트
+
+```bash
+BASE_URL=http://localhost:8080 ./performance/k6/run-all.sh
+```

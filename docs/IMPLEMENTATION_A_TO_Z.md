@@ -7,6 +7,7 @@
 ```mermaid
 flowchart LR
     C[Client]
+    U[Traffic Frontend :8084]
     G[API Gateway :8080]
     A[Auth Service :8081]
     W[Traffic Command Service :8082]
@@ -17,7 +18,8 @@ flowchart LR
     P[(Prometheus)]
     F[(Grafana)]
 
-    C --> G
+    C --> U
+    U --> G
     G --> A
     G --> W
     G --> R
@@ -136,6 +138,16 @@ flowchart LR
 ### Z. 최종 검증
 - `./gradlew test`로 모듈 전체 테스트/인수 테스트 통합 통과 확인.
 
+### Z+1. k6 부하 테스트 자동화
+- `performance/k6/auth-flow.js`: 인증 시나리오 램프업 부하 테스트.
+- `performance/k6/traffic-flow.js`: 이벤트 수집 + 조회 시나리오 램프업 부하 테스트.
+- `performance/k6/run-all.sh`: 결과 JSON/로그를 `performance/results`로 일괄 저장.
+
+### Z+2. Thymeleaf 운영 대시보드 구축
+- `traffic-frontend` 모듈 추가로 운영자 콘솔 제공.
+- 단일 화면에서 회원가입/로그인/이벤트 수집/실시간 요약/최근 이벤트 조회 가능.
+- 5초 주기 Ajax 갱신 + KPI 숫자 애니메이션 + 테이블 갱신 애니메이션 적용.
+
 ## 런타임 동작 방식
 
 ## 1) 인증
@@ -153,6 +165,11 @@ flowchart LR
 2. 이벤트 원본/집계 테이블 업데이트.
 3. 클라이언트 조회 시 DB 기반으로 빠르게 응답.
 
+## 4) 운영 대시보드
+1. 운영자가 `traffic-frontend(:8084)`로 접속.
+2. 프론트엔드가 게이트웨이 `/api`를 호출해 인증/수집/조회 기능을 통합 제공.
+3. `/ui/api/dashboard` Ajax 스냅샷으로 5초마다 KPI/테이블을 갱신.
+
 ## 확장 전략(실무)
 
 - 게이트웨이 수평 확장: 무상태(Stateless) 유지로 인스턴스 증설 용이.
@@ -169,4 +186,6 @@ flowchart LR
 - 인증: `services/auth-service/src/main/kotlin/com/devbattery/infinitytraffic/auth`
 - 커맨드: `services/traffic-command-service/src/main/kotlin/com/devbattery/infinitytraffic/command`
 - 쿼리: `services/traffic-query-service/src/main/kotlin/com/devbattery/infinitytraffic/query`
+- 프론트엔드: `services/traffic-frontend/src/main`
 - 인프라: `infra/docker-compose.yml`, `infra/prometheus/prometheus.yml`
+- 성능 테스트: `performance/k6`, `docs/performance/K6_REPORT.md`
