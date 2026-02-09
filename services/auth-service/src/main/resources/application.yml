@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: auth-service
+  datasource:
+    url: ${AUTH_DATASOURCE_URL:jdbc:h2:mem:authdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE}
+    username: ${AUTH_DATASOURCE_USERNAME:sa}
+    password: ${AUTH_DATASOURCE_PASSWORD:}
+    driver-class-name: ${AUTH_DATASOURCE_DRIVER_CLASS_NAME:org.h2.Driver}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: false
+    open-in-view: false
+  flyway:
+    enabled: true
+
+server:
+  port: 8081
+
+auth:
+  jwt:
+    issuer: ${AUTH_JWT_ISSUER:infinity-traffic-auth}
+    secret: ${AUTH_JWT_SECRET:infinity-traffic-default-secret-key-please-change-this-now-2026}
+    access-token-expire-seconds: ${AUTH_JWT_ACCESS_TOKEN_EXPIRE_SECONDS:3600}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
