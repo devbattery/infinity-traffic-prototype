@@ -13,6 +13,7 @@
 
 - [A부터 Z까지 구현/작동 방식](docs/IMPLEMENTATION_A_TO_Z.md)
 - [A부터 Z까지 앱 사용/검증 설명서](docs/APP_MANUAL_A_TO_Z.md)
+- [기술 스택 기초→실무 응용 완전 학습서](docs/TECH_STACK_ZERO_TO_PRACTICAL_GUIDE_KR.md)
 - [인수 테스트 시나리오](docs/ACCEPTANCE_TESTS.md)
 - [k6 부하 테스트 리포트](docs/performance/K6_REPORT.md)
 - [로컬 실행 상세 가이드](docs/RUN_LOCAL_STACK.md)
