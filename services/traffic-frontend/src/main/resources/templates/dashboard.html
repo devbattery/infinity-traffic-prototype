@@ -108,16 +108,23 @@
             <form class="stack-form" method="post" th:action="@{/traffic/events}" th:object="${trafficEventForm}">
                 <label>지역
                     <select th:field="*{region}">
-                        <option value="SEOUL">SEOUL</option>
-                        <option value="BUSAN">BUSAN</option>
-                        <option value="INCHEON">INCHEON</option>
-                        <option value="DAEJEON">DAEJEON</option>
-                        <option value="GWANGJU">GWANGJU</option>
+                        <option value="SEOUL">서울 (SEOUL)</option>
+                        <option value="BUSAN">부산 (BUSAN)</option>
+                        <option value="INCHEON">인천 (INCHEON)</option>
+                        <option value="DAEJEON">대전 (DAEJEON)</option>
+                        <option value="GWANGJU">광주 (GWANGJU)</option>
                     </select>
                 </label>
                 <label>도로명
-                    <input type="text" th:field="*{roadName}" placeholder="Gangnam-daero 123">
+                    <input type="text" th:field="*{roadName}" placeholder="예: 강변북로, 올림픽대로" list="road-name-samples">
                 </label>
+                <datalist id="road-name-samples">
+                    <option value="강변북로"></option>
+                    <option value="올림픽대로"></option>
+                    <option value="경부고속도로"></option>
+                    <option value="동부간선도로"></option>
+                </datalist>
+                <p class="input-hint">한글 도로명 입력을 지원합니다. 예: 강변북로, 올림픽대로</p>
                 <label>평균 속도 (km/h)
                     <input type="number" th:field="*{averageSpeedKph}" min="0" max="200">
                 </label>

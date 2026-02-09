@@ -61,7 +61,7 @@ class TrafficCommandAcceptanceTest {
 
         val request = TrafficEventIngestRequest(
             region = "SEOUL",
-            roadName = "Gangbyeon",
+            roadName = "강변북로",
             averageSpeedKph = 42,
             congestionLevel = 4,
             observedAt = Instant.now(),
@@ -88,7 +88,7 @@ class TrafficCommandAcceptanceTest {
 
         val message = records.iterator().next().value()
         assertThat(message.region).isEqualTo("SEOUL")
-        assertThat(message.roadName).isEqualTo("Gangbyeon")
+        assertThat(message.roadName).isEqualTo("강변북로")
         assertThat(message.traceId).isEqualTo(traceId)
         assertThat(message.averageSpeedKph).isEqualTo(42)
         assertThat(message.congestionLevel).isEqualTo(4)
