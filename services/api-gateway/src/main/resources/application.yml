@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: api-gateway
+
+server:
+  port: 8080
+
+gateway:
+  services:
+    auth: ${AUTH_SERVICE_URL:http://localhost:8081}
+    command: ${TRAFFIC_COMMAND_SERVICE_URL:http://localhost:8082}
+    query: ${TRAFFIC_QUERY_SERVICE_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
