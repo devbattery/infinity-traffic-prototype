@@ -8,6 +8,21 @@ server:
 frontend:
   gateway:
     base-url: ${GATEWAY_BASE_URL:http://localhost:8080}
+  monitoring:
+    prometheus-url: ${PROMETHEUS_URL:http://localhost:9091}
+    grafana-url: ${GRAFANA_URL:http://localhost:3000}
+    grafana-dashboard-path: ${GRAFANA_DASHBOARD_PATH:/d/infinity-traffic-overview/infinity-traffic-overview?orgId=1&refresh=5s}
+    targets:
+      - name: api-gateway
+        health-url: ${API_GATEWAY_HEALTH_URL:http://localhost:8080/actuator/health}
+      - name: auth-service
+        health-url: ${AUTH_SERVICE_HEALTH_URL:http://localhost:8081/actuator/health}
+      - name: traffic-command-service
+        health-url: ${TRAFFIC_COMMAND_SERVICE_HEALTH_URL:http://localhost:8082/actuator/health}
+      - name: traffic-query-service
+        health-url: ${TRAFFIC_QUERY_SERVICE_HEALTH_URL:http://localhost:8083/actuator/health}
+      - name: traffic-frontend
+        health-url: ${TRAFFIC_FRONTEND_HEALTH_URL:http://localhost:8084/actuator/health}
 
 management:
   endpoints:

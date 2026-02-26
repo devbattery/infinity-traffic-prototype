@@ -3,6 +3,8 @@ import type {
   FrontendMessageResponse,
   LoginRequest,
   LoginSuccessResponse,
+  MonitoringSnapshotResponse,
+  PlatformOverviewResponse,
   RegisterRequest,
   SessionSnapshotResponse,
   TrafficEventIngestRequest,
@@ -55,6 +57,14 @@ export function getDashboard(region: string, limit: number): Promise<DashboardSn
 
 export function getSession(): Promise<SessionSnapshotResponse> {
   return requestJson<SessionSnapshotResponse>('/ui/api/session')
+}
+
+export function getPlatformOverview(): Promise<PlatformOverviewResponse> {
+  return requestJson<PlatformOverviewResponse>('/ui/api/platform/overview')
+}
+
+export function getMonitoringSnapshot(): Promise<MonitoringSnapshotResponse> {
+  return requestJson<MonitoringSnapshotResponse>('/ui/api/monitoring/snapshot')
 }
 
 export function register(request: RegisterRequest): Promise<FrontendMessageResponse> {

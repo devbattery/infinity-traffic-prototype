@@ -1,5 +1,7 @@
 package com.devbattery.infinitytraffic.frontend.web
 
+import com.devbattery.infinitytraffic.frontend.service.FrontendMonitoringService
+import com.devbattery.infinitytraffic.frontend.service.PlatformGuideService
 import com.devbattery.infinitytraffic.frontend.service.TrafficFrontendService
 import jakarta.servlet.http.HttpSession
 import jakarta.validation.Valid
@@ -17,6 +19,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/ui/api")
 class TrafficFrontendApiController(
     private val trafficFrontendService: TrafficFrontendService,
+    private val platformGuideService: PlatformGuideService,
+    private val frontendMonitoringService: FrontendMonitoringService,
 ) {
 
     // 대시보드 카드/테이블에 필요한 데이터를 한 번에 반환한다.
@@ -27,6 +31,16 @@ class TrafficFrontendApiController(
         session: HttpSession,
     ): DashboardSnapshotResponse =
         trafficFrontendService.dashboardSnapshot(region = region, limit = limit, session = session)
+
+    // 사용자가 서비스 목적/사용 흐름을 이해할 수 있도록 안내 정보를 반환한다.
+    @GetMapping("/platform/overview")
+    fun platformOverview(): PlatformOverviewResponse =
+        platformGuideService.overview()
+
+    // Grafana/Prometheus 링크와 서비스 헬스 상태를 한 번에 반환한다.
+    @GetMapping("/monitoring/snapshot")
+    fun monitoringSnapshot(): MonitoringSnapshotResponse =
+        frontendMonitoringService.snapshot()
 
     // 현재 로그인 상태를 조회한다.
     @GetMapping("/session")

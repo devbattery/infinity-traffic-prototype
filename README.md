@@ -67,6 +67,17 @@ docker compose up -d
 - `prometheus`: `9091`
 - `grafana`: `3000`
 
+## 모니터링 연동
+
+- Grafana는 시작 시 자동으로 Prometheus 데이터소스와 `Infinity Traffic Overview` 대시보드를 프로비저닝합니다.
+- 접속 정보
+  - Grafana: `http://localhost:3000` (`admin` / `admin`)
+  - Prometheus: `http://localhost:9091`
+- 프론트 대시보드(`http://localhost:8084/dashboard`)의 `모니터링 연동` 패널에서
+  - 각 서비스 헬스 상태(`UP/DOWN`, 응답시간)
+  - Grafana/Prometheus 바로가기 링크
+  를 함께 확인할 수 있습니다.
+
 ## k6 부하 테스트
 
 ```bash

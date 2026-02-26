@@ -32,6 +32,41 @@ export interface DashboardSnapshotResponse {
   tokenExpiresAt: string | null
 }
 
+export interface PlatformValueStep {
+  order: number
+  title: string
+  description: string
+}
+
+export interface PlatformOverviewResponse {
+  productName: string
+  corePurpose: string
+  primaryUsers: string
+  keyCapabilities: string[]
+  valueFlow: PlatformValueStep[]
+}
+
+export interface MonitoringLink {
+  name: string
+  url: string
+  description: string
+}
+
+export interface MonitoringTargetStatus {
+  name: string
+  healthUrl: string
+  status: string
+  responseTimeMs: number | null
+  detail: string | null
+  checkedAt: string
+}
+
+export interface MonitoringSnapshotResponse {
+  generatedAt: string
+  links: MonitoringLink[]
+  targets: MonitoringTargetStatus[]
+}
+
 export interface SessionSnapshotResponse {
   authenticated: boolean
   username: string | null

@@ -9,8 +9,8 @@ export default function HeroHeader({ refreshing }: HeroHeaderProps) {
         <p className="eyebrow">REAL-TIME TRAFFIC MSA</p>
         <h1>Infinity Traffic Control Center</h1>
         <p className="hero-desc">
-          React + Spring Boot + Kafka 기반으로 실시간 도로 혼잡도를 모니터링하고,
-          이벤트를 즉시 수집/조회합니다.
+          이 대시보드는 교통 이벤트를 실시간으로 수집하고, 지역별 혼잡 현황을 집계해 운영 의사결정을 지원합니다.
+          입력된 이벤트는 Kafka 파이프라인을 거쳐 즉시 요약/최근 이벤트 화면에 반영됩니다.
         </p>
       </div>
       <div className="hero-meta">

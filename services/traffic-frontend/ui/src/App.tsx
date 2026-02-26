@@ -4,10 +4,14 @@ import FlashStack from './components/FlashStack'
 import HeroHeader from './components/HeroHeader'
 import IngestPanel from './components/IngestPanel'
 import KpiPanel from './components/KpiPanel'
+import MonitoringPanel from './components/MonitoringPanel'
+import PurposePanel from './components/PurposePanel'
 import RecentPanel from './components/RecentPanel'
 import SummaryPanel from './components/SummaryPanel'
 import {
   getDashboard,
+  getMonitoringSnapshot,
+  getPlatformOverview,
   getSession,
   ingestTrafficEvent,
   login,
@@ -16,6 +20,8 @@ import {
 } from './api/client'
 import type {
   FlashMessage,
+  MonitoringSnapshotResponse,
+  PlatformOverviewResponse,
   RegionCode,
   SessionSnapshotResponse,
   TrafficEventIngestRequest,
@@ -49,6 +55,9 @@ export default function App() {
   const [summary, setSummary] = useState<TrafficSummaryResponse | null>(null)
   const [recentEvents, setRecentEvents] = useState<TrafficEventMessage[]>([])
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
+  const [platformOverview, setPlatformOverview] = useState<PlatformOverviewResponse | null>(null)
+  const [monitoringSnapshot, setMonitoringSnapshot] = useState<MonitoringSnapshotResponse | null>(null)
+  const [monitoringError, setMonitoringError] = useState<string | null>(null)
   const [session, setSession] = useState<SessionSnapshotResponse>(EMPTY_SESSION)
   const [snapshotTick, setSnapshotTick] = useState(0)
 
@@ -56,6 +65,7 @@ export default function App() {
   const [limit, setLimit] = useState<number>(20)
   const [refreshing, setRefreshing] = useState(false)
   const [busy, setBusy] = useState(false)
+  const [monitoringRefreshing, setMonitoringRefreshing] = useState(false)
   const [flashMessages, setFlashMessages] = useState<FlashMessage[]>([])
 
   const refreshInFlightRef = useRef(false)
@@ -81,7 +91,16 @@ export default function App() {
     setRefreshing(true)
 
     try {
-      const snapshot = await getDashboard(selectedRegion, clampLimit(limit))
+      const [dashboardResult, monitoringResult] = await Promise.allSettled([
+        getDashboard(selectedRegion, clampLimit(limit)),
+        getMonitoringSnapshot(),
+      ])
+
+      if (dashboardResult.status === 'rejected') {
+        throw dashboardResult.reason
+      }
+
+      const snapshot = dashboardResult.value
       setSummary(snapshot.summary)
       setRecentEvents(snapshot.recentEvents)
       setGeneratedAt(snapshot.generatedAt)
@@ -90,6 +109,14 @@ export default function App() {
         username: snapshot.username,
         expiresAt: snapshot.tokenExpiresAt,
       })
+
+      if (monitoringResult.status === 'fulfilled') {
+        setMonitoringSnapshot(monitoringResult.value)
+        setMonitoringError(null)
+      } else {
+        setMonitoringError(toErrorMessage(monitoringResult.reason))
+      }
+
       setSnapshotTick((previous) => previous + 1)
     } catch (error) {
       pushFlash('error', toErrorMessage(error))
@@ -98,6 +125,19 @@ export default function App() {
       setRefreshing(false)
     }
   }, [limit, pushFlash, selectedRegion])
+
+  const refreshMonitoring = useCallback(async () => {
+    setMonitoringRefreshing(true)
+    try {
+      const snapshot = await getMonitoringSnapshot()
+      setMonitoringSnapshot(snapshot)
+      setMonitoringError(null)
+    } catch (error) {
+      setMonitoringError(toErrorMessage(error))
+    } finally {
+      setMonitoringRefreshing(false)
+    }
+  }, [])
 
   const runMutation = useCallback(
     async (action: () => Promise<void>) => {
@@ -200,6 +240,16 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    void getPlatformOverview()
+      .then((overview) => {
+        setPlatformOverview(overview)
+      })
+      .catch((error) => {
+        pushFlash('error', toErrorMessage(error))
+      })
+  }, [pushFlash])
+
+  useEffect(() => {
     void refreshDashboard()
 
     const timerId = window.setInterval(() => {
@@ -233,6 +283,7 @@ export default function App() {
 
         <section className="grid">
           <KpiPanel summary={summary} generatedAt={generatedAt} session={session} refreshing={refreshing} />
+          <PurposePanel overview={platformOverview} />
           <AuthPanel
             session={session}
             onRegister={handleRegister}
@@ -255,6 +306,12 @@ export default function App() {
             onLimitChange={(nextLimit) => setLimit(clampLimit(nextLimit))}
             refreshTick={snapshotTick}
             refreshing={refreshing}
+          />
+          <MonitoringPanel
+            snapshot={monitoringSnapshot}
+            errorMessage={monitoringError}
+            onRefresh={refreshMonitoring}
+            refreshing={refreshing || monitoringRefreshing}
           />
         </section>
       </main>

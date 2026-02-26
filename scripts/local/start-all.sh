@@ -6,8 +6,67 @@ RUNTIME_DIR="$ROOT_DIR/.runtime"
 LOG_DIR="$RUNTIME_DIR/logs"
 PID_DIR="$RUNTIME_DIR/pids"
 FRONTEND_UI_DIR="$ROOT_DIR/services/traffic-frontend/ui"
+JAVA_CMD="java"
 
 mkdir -p "$LOG_DIR" "$PID_DIR"
+
+# 현재 java 실행기의 major 버전을 반환한다.
+java_major_version() {
+  local raw first rest
+  raw="$(java -version 2>&1 | awk -F'"' '/version/ {print $2; exit}')"
+  first="${raw%%.*}"
+  if [[ "$first" == "1" ]]; then
+    rest="${raw#1.}"
+    echo "${rest%%.*}"
+    return
+  fi
+  echo "$first"
+}
+
+# Gradle 8.10.2 런타임과 호환되는 Java(17~23)를 보장한다.
+ensure_compatible_java() {
+  if ! command -v java >/dev/null 2>&1; then
+    echo "[start-all] java is required but not found in PATH"
+    exit 1
+  fi
+
+  local major
+  major="$(java_major_version)"
+  if [[ "$major" -ge 17 && "$major" -le 23 ]]; then
+    if [[ -n "${JAVA_HOME:-}" && -x "$JAVA_HOME/bin/java" ]]; then
+      JAVA_CMD="$JAVA_HOME/bin/java"
+    else
+      JAVA_CMD="$(command -v java)"
+    fi
+    echo "[start-all] using Java $major (${JAVA_HOME:-system default})"
+    return
+  fi
+
+  echo "[start-all] detected Java $major, but Gradle 8.10.2 requires Java 17~23 for the launcher runtime."
+
+  if [[ "$(uname -s)" == "Darwin" && -x "/usr/libexec/java_home" ]]; then
+    local jdk17_home
+    jdk17_home="$(/usr/libexec/java_home -v 17 2>/dev/null || true)"
+    if [[ -n "$jdk17_home" ]]; then
+      export JAVA_HOME="$jdk17_home"
+      export PATH="$JAVA_HOME/bin:$PATH"
+      major="$(java_major_version)"
+      if [[ "$major" -ge 17 && "$major" -le 23 ]]; then
+        JAVA_CMD="$JAVA_HOME/bin/java"
+        echo "[start-all] switched JAVA_HOME to $JAVA_HOME (Java $major)"
+        return
+      fi
+    fi
+  fi
+
+  cat <<EOF
+[start-all] compatible Java runtime not found.
+[start-all] Please install/use JDK 17 (recommended) and rerun:
+  export JAVA_HOME=\$(/usr/libexec/java_home -v 17)
+  export PATH="\$JAVA_HOME/bin:\$PATH"
+EOF
+  exit 1
+}
 
 # PID 파일로 등록된 이전 프로세스가 있으면 먼저 정리한다.
 stop_registered_processes() {
@@ -103,6 +162,7 @@ start_service() {
 }
 
 cd "$ROOT_DIR"
+ensure_compatible_java
 
 echo "[start-all] ensure infra is running"
 docker compose -f infra/docker-compose.yml up -d > /tmp/infinity_infra_up.log 2>&1 || {
@@ -118,11 +178,11 @@ echo "[start-all] build application jars"
 stop_registered_processes
 stop_ports
 
-start_service "auth-service" "java -jar $ROOT_DIR/services/auth-service/build/libs/auth-service-0.1.0-SNAPSHOT.jar"
-start_service "traffic-command-service" "KAFKA_BOOTSTRAP_SERVERS=localhost:9094 java -jar $ROOT_DIR/services/traffic-command-service/build/libs/traffic-command-service-0.1.0-SNAPSHOT.jar"
-start_service "traffic-query-service" "KAFKA_BOOTSTRAP_SERVERS=localhost:9094 java -jar $ROOT_DIR/services/traffic-query-service/build/libs/traffic-query-service-0.1.0-SNAPSHOT.jar"
-start_service "api-gateway" "java -jar $ROOT_DIR/services/api-gateway/build/libs/api-gateway-0.1.0-SNAPSHOT.jar"
-start_service "traffic-frontend" "java -jar $ROOT_DIR/services/traffic-frontend/build/libs/traffic-frontend-0.1.0-SNAPSHOT.jar"
+start_service "auth-service" "\"$JAVA_CMD\" -jar \"$ROOT_DIR/services/auth-service/build/libs/auth-service-0.1.0-SNAPSHOT.jar\""
+start_service "traffic-command-service" "KAFKA_BOOTSTRAP_SERVERS=localhost:9094 \"$JAVA_CMD\" -jar \"$ROOT_DIR/services/traffic-command-service/build/libs/traffic-command-service-0.1.0-SNAPSHOT.jar\""
+start_service "traffic-query-service" "KAFKA_BOOTSTRAP_SERVERS=localhost:9094 \"$JAVA_CMD\" -jar \"$ROOT_DIR/services/traffic-query-service/build/libs/traffic-query-service-0.1.0-SNAPSHOT.jar\""
+start_service "api-gateway" "\"$JAVA_CMD\" -jar \"$ROOT_DIR/services/api-gateway/build/libs/api-gateway-0.1.0-SNAPSHOT.jar\""
+start_service "traffic-frontend" "\"$JAVA_CMD\" -jar \"$ROOT_DIR/services/traffic-frontend/build/libs/traffic-frontend-0.1.0-SNAPSHOT.jar\""
 
 wait_health "auth-service" 8081
 wait_health "traffic-command-service" 8082
