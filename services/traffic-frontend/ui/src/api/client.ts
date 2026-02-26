@@ -10,6 +10,7 @@ import type {
   TrafficEventIngestRequest,
   TrafficEventIngestSuccessResponse,
 } from '../types'
+import { ALL_REGION_CODE } from '../constants/regions'
 
 interface ApiErrorPayload {
   message?: string
@@ -47,7 +48,7 @@ async function requestJson<T>(path: string, init?: RequestInit): Promise<T> {
 
 export function getDashboard(region: string, limit: number): Promise<DashboardSnapshotResponse> {
   const params = new URLSearchParams()
-  if (region !== 'ALL') {
+  if (region !== ALL_REGION_CODE) {
     params.set('region', region)
   }
   params.set('limit', String(limit))

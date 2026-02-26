@@ -411,6 +411,70 @@ h1 {
   margin-top: 10px;
 }
 
+.ingest-guide {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--surface-strong);
+  margin-bottom: 10px;
+}
+
+.ingest-guide-title {
+  margin: 0;
+  color: var(--teal);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.ingest-guide-list {
+  margin-top: 8px;
+  display: grid;
+  gap: 4px;
+}
+
+.ingest-guide-list p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink-700);
+  line-height: 1.45;
+}
+
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.preset-btn {
+  border: 1px solid var(--line);
+  background: var(--surface-strong);
+  border-radius: 12px;
+  padding: 10px 12px;
+  text-align: left;
+  color: var(--ink-900);
+  display: grid;
+  gap: 3px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.preset-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(10, 40, 66, 0.12);
+}
+
+.preset-btn > span:first-child {
+  font-weight: 700;
+}
+
+.preset-caption {
+  color: var(--ink-500);
+  font-size: 0.76rem;
+  line-height: 1.35;
+}
+
 .stack-form {
   display: grid;
   gap: 10px;
@@ -782,7 +846,8 @@ tbody tr:last-child td {
 
   .purpose-capability-list,
   .purpose-flow-list,
-  .monitoring-links {
+  .monitoring-links,
+  .preset-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -805,7 +870,8 @@ tbody tr:last-child td {
 
   .purpose-capability-list,
   .purpose-flow-list,
-  .monitoring-links {
+  .monitoring-links,
+  .preset-grid {
     grid-template-columns: 1fr;
   }
 

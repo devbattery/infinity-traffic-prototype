@@ -1,4 +1,4 @@
-export type RegionCode = 'ALL' | 'SEOUL' | 'BUSAN' | 'INCHEON' | 'DAEJEON' | 'GWANGJU'
+export type RegionCode = string
 
 export interface RegionSummary {
   region: string
@@ -102,7 +102,7 @@ export interface LoginRequest {
 }
 
 export interface TrafficEventIngestRequest {
-  region: Exclude<RegionCode, 'ALL'>
+  region: string
   roadName: string
   averageSpeedKph: number
   congestionLevel: number

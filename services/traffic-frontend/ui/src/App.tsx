@@ -28,6 +28,7 @@ import type {
   TrafficEventMessage,
   TrafficSummaryResponse,
 } from './types'
+import { ALL_REGION_CODE } from './constants/regions'
 
 const REFRESH_INTERVAL_MS = 5_000
 
@@ -61,7 +62,7 @@ export default function App() {
   const [session, setSession] = useState<SessionSnapshotResponse>(EMPTY_SESSION)
   const [snapshotTick, setSnapshotTick] = useState(0)
 
-  const [selectedRegion, setSelectedRegion] = useState<RegionCode>('ALL')
+  const [selectedRegion, setSelectedRegion] = useState<RegionCode>(ALL_REGION_CODE)
   const [limit, setLimit] = useState<number>(20)
   const [refreshing, setRefreshing] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -291,7 +292,11 @@ export default function App() {
             onLogout={handleLogout}
             busy={busy}
           />
-          <IngestPanel onSubmit={handleIngest} busy={busy} />
+          <IngestPanel
+            onSubmit={handleIngest}
+            busy={busy}
+            knownRegions={summary?.regions.map((region) => region.region) ?? []}
+          />
           <SummaryPanel
             summary={summary}
             selectedRegion={selectedRegion}

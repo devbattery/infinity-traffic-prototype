@@ -1,4 +1,10 @@
 import type { RegionCode, TrafficSummaryResponse } from '../types'
+import {
+  ALL_REGION_CODE,
+  formatRegionLabel,
+  mergeRegionCodes,
+  REGION_DEFINITIONS,
+} from '../constants/regions'
 
 interface SummaryPanelProps {
   summary: TrafficSummaryResponse | null
@@ -9,8 +15,6 @@ interface SummaryPanelProps {
   refreshTick: number
 }
 
-const REGIONS: RegionCode[] = ['ALL', 'SEOUL', 'BUSAN', 'INCHEON', 'DAEJEON', 'GWANGJU']
-
 export default function SummaryPanel({
   summary,
   selectedRegion,
@@ -20,6 +24,13 @@ export default function SummaryPanel({
   refreshTick,
 }: SummaryPanelProps) {
   const rows = summary?.regions ?? []
+  const filterRegionCodes: RegionCode[] = [
+    ALL_REGION_CODE,
+    ...mergeRegionCodes(
+      REGION_DEFINITIONS.map((region) => region.code),
+      rows.map((row) => row.region),
+    ),
+  ]
 
   return (
     <article className={`panel summary-panel${refreshing ? ' is-refreshing' : ''}`} data-reveal="true">
@@ -29,9 +40,9 @@ export default function SummaryPanel({
           <label>
             지역 필터
             <select value={selectedRegion} onChange={(event) => onRegionChange(event.target.value as RegionCode)}>
-              {REGIONS.map((region) => (
+              {filterRegionCodes.map((region) => (
                 <option key={region} value={region}>
-                  {region}
+                  {formatRegionLabel(region)}
                 </option>
               ))}
             </select>
@@ -62,7 +73,7 @@ export default function SummaryPanel({
             ) : (
               rows.map((row, index) => (
                 <tr key={row.region} className="row-reveal" style={{ animationDelay: `${index * 45}ms` }}>
-                  <td>{row.region}</td>
+                  <td>{formatRegionLabel(row.region)}</td>
                   <td>{row.totalEvents}</td>
                   <td>{Number(row.averageSpeedKph ?? 0).toFixed(1)}</td>
                   <td>

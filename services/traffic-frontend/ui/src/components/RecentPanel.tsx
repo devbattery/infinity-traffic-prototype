@@ -1,4 +1,5 @@
 import type { TrafficEventMessage } from '../types'
+import { formatRegionLabel } from '../constants/regions'
 
 interface RecentPanelProps {
   events: TrafficEventMessage[]
@@ -47,7 +48,7 @@ export default function RecentPanel({ events, limit, onLimitChange, refreshTick,
               events.map((event, index) => (
                 <tr key={event.eventId} className="row-reveal" style={{ animationDelay: `${index * 35}ms` }}>
                   <td>{formatDate(event.observedAt)}</td>
-                  <td>{event.region}</td>
+                  <td>{formatRegionLabel(event.region)}</td>
                   <td>{event.roadName}</td>
                   <td>{event.averageSpeedKph}</td>
                   <td>
