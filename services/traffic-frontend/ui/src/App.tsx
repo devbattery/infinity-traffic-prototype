@@ -50,6 +50,7 @@ export default function App() {
   const [recentEvents, setRecentEvents] = useState<TrafficEventMessage[]>([])
   const [generatedAt, setGeneratedAt] = useState<string | null>(null)
   const [session, setSession] = useState<SessionSnapshotResponse>(EMPTY_SESSION)
+  const [snapshotTick, setSnapshotTick] = useState(0)
 
   const [selectedRegion, setSelectedRegion] = useState<RegionCode>('ALL')
   const [limit, setLimit] = useState<number>(20)
@@ -89,6 +90,7 @@ export default function App() {
         username: snapshot.username,
         expiresAt: snapshot.tokenExpiresAt,
       })
+      setSnapshotTick((previous) => previous + 1)
     } catch (error) {
       pushFlash('error', toErrorMessage(error))
     } finally {
@@ -206,11 +208,11 @@ export default function App() {
       </div>
 
       <main className="layout">
-        <HeroHeader />
+        <HeroHeader refreshing={refreshing} />
         <FlashStack messages={flashMessages} onDismiss={dismissFlash} />
 
         <section className="grid">
-          <KpiPanel summary={summary} generatedAt={generatedAt} session={session} />
+          <KpiPanel summary={summary} generatedAt={generatedAt} session={session} refreshing={refreshing} />
           <AuthPanel
             session={session}
             onRegister={handleRegister}
@@ -225,11 +227,14 @@ export default function App() {
             onRegionChange={setSelectedRegion}
             onRefresh={refreshDashboard}
             refreshing={refreshing}
+            refreshTick={snapshotTick}
           />
           <RecentPanel
             events={recentEvents}
             limit={limit}
             onLimitChange={(nextLimit) => setLimit(clampLimit(nextLimit))}
+            refreshTick={snapshotTick}
+            refreshing={refreshing}
           />
         </section>
       </main>

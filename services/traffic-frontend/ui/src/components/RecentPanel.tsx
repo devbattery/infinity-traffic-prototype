@@ -4,11 +4,13 @@ interface RecentPanelProps {
   events: TrafficEventMessage[]
   limit: number
   onLimitChange: (limit: number) => void
+  refreshTick: number
+  refreshing: boolean
 }
 
-export default function RecentPanel({ events, limit, onLimitChange }: RecentPanelProps) {
+export default function RecentPanel({ events, limit, onLimitChange, refreshTick, refreshing }: RecentPanelProps) {
   return (
-    <article className="panel recent-panel" data-reveal="true">
+    <article className={`panel recent-panel${refreshing ? ' is-refreshing' : ''}`} data-reveal="true">
       <div className="panel-title-row">
         <h2>최근 이벤트</h2>
         <label>
@@ -34,7 +36,7 @@ export default function RecentPanel({ events, limit, onLimitChange }: RecentPane
               <th>Congestion</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={refreshTick}>
             {events.length === 0 ? (
               <tr>
                 <td colSpan={5} className="empty">
@@ -42,8 +44,8 @@ export default function RecentPanel({ events, limit, onLimitChange }: RecentPane
                 </td>
               </tr>
             ) : (
-              events.map((event) => (
-                <tr key={event.eventId}>
+              events.map((event, index) => (
+                <tr key={event.eventId} className="row-reveal" style={{ animationDelay: `${index * 35}ms` }}>
                   <td>{formatDate(event.observedAt)}</td>
                   <td>{event.region}</td>
                   <td>{event.roadName}</td>

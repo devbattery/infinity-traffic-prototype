@@ -132,6 +132,33 @@ h1 {
   margin-bottom: 4px;
 }
 
+.status-chip {
+  min-width: 130px;
+}
+
+.live-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.live-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #2ba46f;
+  color: rgba(43, 164, 111, 0.45);
+  box-shadow: 0 0 0 0 rgba(43, 164, 111, 0.45);
+  animation: livePulse 2.2s infinite;
+}
+
+.live-dot.is-refreshing {
+  background: #ee7c2a;
+  color: rgba(238, 124, 42, 0.5);
+  box-shadow: 0 0 0 0 rgba(238, 124, 42, 0.5);
+  animation-duration: 0.9s;
+}
+
 .flash-stack {
   margin-top: 14px;
   display: grid;
@@ -167,6 +194,8 @@ h1 {
 }
 
 .panel {
+  position: relative;
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -174,6 +203,21 @@ h1 {
   padding: 20px;
   backdrop-filter: blur(10px);
   animation: fadeInUp 0.45s ease both;
+}
+
+.panel.is-refreshing::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    105deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(15, 127, 138, 0.08) 45%,
+    rgba(255, 255, 255, 0) 75%
+  );
+  transform: translateX(-120%);
+  animation: panelSweep 0.8s ease;
+  pointer-events: none;
 }
 
 .panel h2 {
@@ -353,6 +397,10 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 
+.row-reveal {
+  animation: rowReveal 0.45s ease both;
+}
+
 .empty {
   text-align: center;
   color: var(--ink-500);
@@ -418,6 +466,44 @@ tbody tr:last-child td {
   }
 }
 
+@keyframes rowReveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    background: rgba(15, 127, 138, 0.1);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    background: transparent;
+  }
+}
+
+@keyframes panelSweep {
+  from {
+    transform: translateX(-120%);
+  }
+
+  to {
+    transform: translateX(120%);
+  }
+}
+
+@keyframes livePulse {
+  0% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+
+  70% {
+    box-shadow: 0 0 0 9px transparent;
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
 @keyframes drift {
   0%,
   100% {
@@ -426,6 +512,16 @@ tbody tr:last-child td {
 
   50% {
     transform: translate(18px, -14px) scale(1.06);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }
 

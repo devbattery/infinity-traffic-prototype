@@ -6,6 +6,7 @@ interface SummaryPanelProps {
   onRegionChange: (region: RegionCode) => void
   onRefresh: () => Promise<void>
   refreshing: boolean
+  refreshTick: number
 }
 
 const REGIONS: RegionCode[] = ['ALL', 'SEOUL', 'BUSAN', 'INCHEON', 'DAEJEON', 'GWANGJU']
@@ -16,11 +17,12 @@ export default function SummaryPanel({
   onRegionChange,
   onRefresh,
   refreshing,
+  refreshTick,
 }: SummaryPanelProps) {
   const rows = summary?.regions ?? []
 
   return (
-    <article className="panel summary-panel" data-reveal="true">
+    <article className={`panel summary-panel${refreshing ? ' is-refreshing' : ''}`} data-reveal="true">
       <div className="panel-title-row">
         <h2>지역별 요약</h2>
         <div className="inline-controls">
@@ -50,7 +52,7 @@ export default function SummaryPanel({
               <th>Congestion</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody key={refreshTick}>
             {rows.length === 0 ? (
               <tr>
                 <td colSpan={4} className="empty">
@@ -58,8 +60,8 @@ export default function SummaryPanel({
                 </td>
               </tr>
             ) : (
-              rows.map((row) => (
-                <tr key={row.region}>
+              rows.map((row, index) => (
+                <tr key={row.region} className="row-reveal" style={{ animationDelay: `${index * 45}ms` }}>
                   <td>{row.region}</td>
                   <td>{row.totalEvents}</td>
                   <td>{Number(row.averageSpeedKph ?? 0).toFixed(1)}</td>

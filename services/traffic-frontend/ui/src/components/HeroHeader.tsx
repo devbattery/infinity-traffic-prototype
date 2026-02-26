@@ -1,4 +1,8 @@
-export default function HeroHeader() {
+interface HeroHeaderProps {
+  refreshing: boolean
+}
+
+export default function HeroHeader({ refreshing }: HeroHeaderProps) {
   return (
     <header className="hero" data-reveal="true">
       <div>
@@ -10,6 +14,13 @@ export default function HeroHeader() {
         </p>
       </div>
       <div className="hero-meta">
+        <div className="meta-chip status-chip">
+          <span className="meta-label">Snapshot</span>
+          <strong className="live-status">
+            <span className={`live-dot ${refreshing ? 'is-refreshing' : ''}`} />
+            {refreshing ? 'SYNCING' : 'LIVE'}
+          </strong>
+        </div>
         <div className="meta-chip">
           <span className="meta-label">Gateway</span>
           <strong>api-gateway :8080</strong>
