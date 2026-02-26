@@ -6,7 +6,7 @@
 - 인증: `auth-service`
 - 쓰기(CQRS Command): `traffic-command-service`
 - 읽기(CQRS Query): `traffic-query-service`
-- 운영 대시보드(Thymeleaf): `traffic-frontend`
+- 운영 대시보드(React SPA): `traffic-frontend`
 - 공통 계약/추적: `shared-kernel`
 
 상세 구현 순서(A→Z)와 동작 원리는 아래 문서를 확인하세요.
@@ -29,6 +29,14 @@
 
 ```bash
 ./gradlew test
+```
+
+### 1-1) 프론트엔드(UI) 번들 갱신
+
+```bash
+cd services/traffic-frontend/ui
+npm install
+npm run build
 ```
 
 ### 2) 인프라 실행(Kafka/PostgreSQL/Redis/Prometheus/Grafana)

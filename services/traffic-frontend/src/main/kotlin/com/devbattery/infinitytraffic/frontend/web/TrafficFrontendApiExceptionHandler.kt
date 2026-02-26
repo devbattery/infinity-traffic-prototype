@@ -25,9 +25,16 @@ class TrafficFrontendApiExceptionHandler {
     // 요청 바인딩 검증 실패를 400 오류로 반환한다.
     @ExceptionHandler(MethodArgumentNotValidException::class, BindException::class)
     fun handleValidationException(exception: Exception): ResponseEntity<FrontendApiError> {
+        val message =
+            when (exception) {
+                is MethodArgumentNotValidException -> exception.bindingResult.fieldErrors.firstOrNull()?.defaultMessage
+                is BindException -> exception.bindingResult.fieldErrors.firstOrNull()?.defaultMessage
+                else -> null
+            } ?: "입력값이 유효하지 않습니다."
+
         return ResponseEntity
             .status(HttpStatus.BAD_REQUEST)
-            .body(FrontendApiError(code = "VALIDATION_ERROR", message = exception.message ?: "입력값이 유효하지 않습니다."))
+            .body(FrontendApiError(code = "VALIDATION_ERROR", message = message))
     }
 
     // 처리되지 않은 예외를 500 오류로 반환한다.

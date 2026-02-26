@@ -9,63 +9,12 @@ import jakarta.validation.constraints.Size
 import java.time.Instant
 
 /**
- * 회원가입 폼 바인딩 모델이다.
- */
-data class RegisterForm(
-    @field:NotBlank(message = "아이디를 입력해 주세요.")
-    var username: String = "",
-    @field:Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
-    var password: String = "",
-) {
-    // 게이트웨이 인증 API 요청 모델로 변환한다.
-    fun toRequest(): RegisterRequest = RegisterRequest(username = username.trim(), password = password)
-}
-
-/**
- * 로그인 폼 바인딩 모델이다.
- */
-data class LoginForm(
-    @field:NotBlank(message = "아이디를 입력해 주세요.")
-    var username: String = "",
-    @field:NotBlank(message = "비밀번호를 입력해 주세요.")
-    var password: String = "",
-) {
-    // 게이트웨이 로그인 API 요청 모델로 변환한다.
-    fun toRequest(): LoginRequest = LoginRequest(username = username.trim(), password = password)
-}
-
-/**
- * 교통 이벤트 수집 폼 바인딩 모델이다.
- */
-data class TrafficEventForm(
-    @field:NotBlank(message = "지역을 선택해 주세요.")
-    var region: String = "SEOUL",
-    @field:NotBlank(message = "도로명을 입력해 주세요.")
-    var roadName: String = "",
-    @field:Min(value = 0, message = "평균 속도는 0 이상이어야 합니다.")
-    @field:Max(value = 200, message = "평균 속도는 200 이하이어야 합니다.")
-    var averageSpeedKph: Int = 40,
-    @field:Min(value = 1, message = "혼잡도는 1 이상이어야 합니다.")
-    @field:Max(value = 5, message = "혼잡도는 5 이하여야 합니다.")
-    var congestionLevel: Int = 3,
-    var observedAt: Instant? = null,
-) {
-    // 게이트웨이 이벤트 수집 API 요청 모델로 변환한다.
-    fun toRequest(): TrafficEventIngestRequest =
-        TrafficEventIngestRequest(
-            region = region.trim(),
-            roadName = roadName.trim(),
-            averageSpeedKph = averageSpeedKph,
-            congestionLevel = congestionLevel,
-            observedAt = observedAt,
-        )
-}
-
-/**
  * 게이트웨이 회원가입 API 요청 모델이다.
  */
 data class RegisterRequest(
+    @field:NotBlank(message = "아이디를 입력해 주세요.")
     val username: String,
+    @field:Size(min = 8, message = "비밀번호는 최소 8자 이상이어야 합니다.")
     val password: String,
 )
 
@@ -73,7 +22,9 @@ data class RegisterRequest(
  * 게이트웨이 로그인 API 요청 모델이다.
  */
 data class LoginRequest(
+    @field:NotBlank(message = "아이디를 입력해 주세요.")
     val username: String,
+    @field:NotBlank(message = "비밀번호를 입력해 주세요.")
     val password: String,
 )
 
@@ -81,9 +32,15 @@ data class LoginRequest(
  * 게이트웨이 이벤트 수집 API 요청 모델이다.
  */
 data class TrafficEventIngestRequest(
+    @field:NotBlank(message = "지역을 선택해 주세요.")
     val region: String,
+    @field:NotBlank(message = "도로명을 입력해 주세요.")
     val roadName: String,
+    @field:Min(value = 0, message = "평균 속도는 0 이상이어야 합니다.")
+    @field:Max(value = 200, message = "평균 속도는 200 이하이어야 합니다.")
     val averageSpeedKph: Int,
+    @field:Min(value = 1, message = "혼잡도는 1 이상이어야 합니다.")
+    @field:Max(value = 5, message = "혼잡도는 5 이하여야 합니다.")
     val congestionLevel: Int,
     val observedAt: Instant? = null,
 )
@@ -133,7 +90,7 @@ data class FrontendUserSession(
 )
 
 /**
- * 대시보드 Ajax 갱신 응답 모델이다.
+ * 대시보드 스냅샷 응답 모델이다.
  */
 data class DashboardSnapshotResponse(
     val generatedAt: Instant,
@@ -141,6 +98,43 @@ data class DashboardSnapshotResponse(
     val recentEvents: List<TrafficEventMessage>,
     val authenticated: Boolean,
     val username: String?,
+    val tokenExpiresAt: Instant?,
+)
+
+/**
+ * 현재 세션 스냅샷 응답 모델이다.
+ */
+data class SessionSnapshotResponse(
+    val authenticated: Boolean,
+    val username: String?,
+    val expiresAt: Instant?,
+)
+
+/**
+ * 단순 메시지 응답 모델이다.
+ */
+data class FrontendMessageResponse(
+    val message: String,
+    val timestamp: Instant = Instant.now(),
+)
+
+/**
+ * 로그인 성공 응답 모델이다.
+ */
+data class LoginSuccessResponse(
+    val message: String,
+    val username: String,
+    val expiresAt: Instant,
+)
+
+/**
+ * 이벤트 수집 성공 응답 모델이다.
+ */
+data class TrafficEventIngestSuccessResponse(
+    val message: String,
+    val eventId: String,
+    val status: String,
+    val observedAt: Instant,
 )
 
 /**

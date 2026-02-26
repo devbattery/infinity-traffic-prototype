@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
 :root {
-  --surface: rgba(255, 255, 255, 0.82);
-  --surface-strong: rgba(255, 255, 255, 0.95);
+  --surface: rgba(255, 255, 255, 0.86);
+  --surface-strong: rgba(255, 255, 255, 0.97);
   --ink-900: #102436;
   --ink-700: #2a4a61;
   --ink-500: #5b7b90;
@@ -20,12 +22,12 @@
 body {
   margin: 0;
   min-height: 100vh;
-  font-family: "Space Grotesk", "Noto Sans KR", sans-serif;
+  font-family: 'Space Grotesk', 'Noto Sans KR', sans-serif;
   color: var(--ink-900);
   background:
-      radial-gradient(circle at 10% 15%, rgba(26, 186, 201, 0.24), transparent 42%),
-      radial-gradient(circle at 85% 10%, rgba(245, 164, 95, 0.28), transparent 36%),
-      linear-gradient(135deg, #f4fbff 0%, #fff7ee 48%, #f8fbff 100%);
+    radial-gradient(circle at 10% 15%, rgba(26, 186, 201, 0.24), transparent 42%),
+    radial-gradient(circle at 85% 10%, rgba(245, 164, 95, 0.28), transparent 36%),
+    linear-gradient(135deg, #f4fbff 0%, #fff7ee 48%, #f8fbff 100%);
 }
 
 .ambient {
@@ -141,6 +143,8 @@ h1 {
   border-radius: 12px;
   border: 1px solid transparent;
   animation: fadeInUp 0.35s ease;
+  text-align: left;
+  cursor: pointer;
 }
 
 .flash.success {
@@ -169,6 +173,7 @@ h1 {
   box-shadow: var(--shadow);
   padding: 20px;
   backdrop-filter: blur(10px);
+  animation: fadeInUp 0.45s ease both;
 }
 
 .panel h2 {
@@ -291,7 +296,7 @@ select:focus {
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.btn:hover {
+.btn:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 10px 20px rgba(8, 93, 105, 0.25);
 }
@@ -299,6 +304,11 @@ select:focus {
 .btn.secondary {
   background: linear-gradient(120deg, #f39f45 0%, var(--orange) 100%);
   box-shadow: none;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .inline-controls {
@@ -343,10 +353,6 @@ tbody tr:last-child td {
   border-bottom: 0;
 }
 
-tbody tr[data-row-animate] {
-  animation: rowPulse 0.34s ease;
-}
-
 .empty {
   text-align: center;
   color: var(--ink-500);
@@ -365,11 +371,25 @@ tbody tr[data-row-animate] {
   font-size: 0.78rem;
 }
 
-.level-1 { background: #2ba46f; }
-.level-2 { background: #48ab60; }
-.level-3 { background: #d2942f; }
-.level-4 { background: #df6e32; }
-.level-5 { background: #d94841; }
+.level-1 {
+  background: #2ba46f;
+}
+
+.level-2 {
+  background: #48ab60;
+}
+
+.level-3 {
+  background: #d2942f;
+}
+
+.level-4 {
+  background: #df6e32;
+}
+
+.level-5 {
+  background: #d94841;
+}
 
 .auth-state {
   display: grid;
@@ -386,31 +406,15 @@ tbody tr[data-row-animate] {
   font-size: 0.82rem;
 }
 
-[data-reveal] {
-  animation: fadeInUp 0.45s ease both;
-}
-
-[data-reveal]:nth-child(2) { animation-delay: 0.06s; }
-[data-reveal]:nth-child(3) { animation-delay: 0.12s; }
-[data-reveal]:nth-child(4) { animation-delay: 0.18s; }
-
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(12px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes rowPulse {
-  from {
-    background: rgba(15, 127, 138, 0.12);
-  }
-  to {
-    background: transparent;
   }
 }
 
@@ -419,6 +423,7 @@ tbody tr[data-row-animate] {
   100% {
     transform: translate(0, 0) scale(1);
   }
+
   50% {
     transform: translate(18px, -14px) scale(1.06);
   }

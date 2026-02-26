@@ -39,6 +39,9 @@ out/
 ### Kotlin ###
 .kotlin
 
+### Node ###
+**/node_modules/
+
 ### Local runtime artifacts ###
 .runtime/
 performance/results/
