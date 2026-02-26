@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 RUNTIME_DIR="$ROOT_DIR/.runtime"
 LOG_DIR="$RUNTIME_DIR/logs"
 PID_DIR="$RUNTIME_DIR/pids"
+FRONTEND_UI_DIR="$ROOT_DIR/services/traffic-frontend/ui"
 
 mkdir -p "$LOG_DIR" "$PID_DIR"
 
@@ -65,6 +66,31 @@ wait_health() {
   return 1
 }
 
+# React SPA 정적 번들을 항상 최신 상태로 맞춘다.
+# - package-lock 변경 시 의존성을 재설치하고
+# - 매 실행마다 npm build를 수행해 Spring 정적 리소스를 갱신한다.
+build_frontend_bundle() {
+  if [[ ! -f "$FRONTEND_UI_DIR/package.json" ]]; then
+    echo "[start-all] frontend package.json not found: $FRONTEND_UI_DIR"
+    exit 1
+  fi
+
+  if ! command -v npm >/dev/null 2>&1; then
+    echo "[start-all] npm is required but not found in PATH"
+    exit 1
+  fi
+
+  if [[ ! -d "$FRONTEND_UI_DIR/node_modules" || "$FRONTEND_UI_DIR/package-lock.json" -nt "$FRONTEND_UI_DIR/node_modules" ]]; then
+    echo "[start-all] install frontend dependencies"
+    (cd "$FRONTEND_UI_DIR" && npm install --no-audit --no-fund)
+  else
+    echo "[start-all] frontend dependencies are up to date"
+  fi
+
+  echo "[start-all] build frontend static bundle"
+  (cd "$FRONTEND_UI_DIR" && npm run build)
+}
+
 start_service() {
   local service="$1"
   local cmd="$2"
@@ -83,6 +109,8 @@ docker compose -f infra/docker-compose.yml up -d > /tmp/infinity_infra_up.log 2>
   cat /tmp/infinity_infra_up.log
   exit 1
 }
+
+build_frontend_bundle
 
 echo "[start-all] build application jars"
 ./gradlew :auth-service:bootJar :traffic-command-service:bootJar :traffic-query-service:bootJar :api-gateway:bootJar :traffic-frontend:bootJar
