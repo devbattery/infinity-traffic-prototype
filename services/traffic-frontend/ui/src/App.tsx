@@ -117,11 +117,16 @@ export default function App() {
   const handleRegister = useCallback(
     async (request: { username: string; password: string }) => {
       await runMutation(async () => {
-        const response = await register({
-          username: request.username.trim(),
-          password: request.password,
-        })
-        pushFlash('success', response.message)
+        try {
+          const response = await register({
+            username: request.username.trim(),
+            password: request.password,
+          })
+          pushFlash('success', response.message)
+        } catch (error) {
+          pushFlash('error', toErrorMessage(error))
+          throw error
+        }
       })
     },
     [pushFlash, runMutation],
@@ -130,17 +135,22 @@ export default function App() {
   const handleLogin = useCallback(
     async (request: { username: string; password: string }) => {
       await runMutation(async () => {
-        const response = await login({
-          username: request.username.trim(),
-          password: request.password,
-        })
-        setSession({
-          authenticated: true,
-          username: response.username,
-          expiresAt: response.expiresAt,
-        })
-        pushFlash('success', response.message)
-        await refreshDashboard()
+        try {
+          const response = await login({
+            username: request.username.trim(),
+            password: request.password,
+          })
+          setSession({
+            authenticated: true,
+            username: response.username,
+            expiresAt: response.expiresAt,
+          })
+          pushFlash('success', response.message)
+          await refreshDashboard()
+        } catch (error) {
+          pushFlash('error', toErrorMessage(error))
+          throw error
+        }
       })
     },
     [pushFlash, refreshDashboard, runMutation],
@@ -148,22 +158,32 @@ export default function App() {
 
   const handleLogout = useCallback(async () => {
     await runMutation(async () => {
-      const response = await logout()
-      setSession(EMPTY_SESSION)
-      pushFlash('success', response.message)
-      await refreshDashboard()
+      try {
+        const response = await logout()
+        setSession(EMPTY_SESSION)
+        pushFlash('success', response.message)
+        await refreshDashboard()
+      } catch (error) {
+        pushFlash('error', toErrorMessage(error))
+        throw error
+      }
     })
   }, [pushFlash, refreshDashboard, runMutation])
 
   const handleIngest = useCallback(
     async (request: TrafficEventIngestRequest) => {
       await runMutation(async () => {
-        const response = await ingestTrafficEvent({
-          ...request,
-          roadName: request.roadName.trim(),
-        })
-        pushFlash('success', `${response.message} eventId=${response.eventId}`)
-        await refreshDashboard()
+        try {
+          const response = await ingestTrafficEvent({
+            ...request,
+            roadName: request.roadName.trim(),
+          })
+          pushFlash('success', `${response.message} eventId=${response.eventId}`)
+          await refreshDashboard()
+        } catch (error) {
+          pushFlash('error', toErrorMessage(error))
+          throw error
+        }
       })
     },
     [pushFlash, refreshDashboard, runMutation],

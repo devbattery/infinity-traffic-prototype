@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { FormEvent, useEffect, useState } from 'react'
 import type { LoginRequest, RegisterRequest, SessionSnapshotResponse } from '../types'
 
 interface AuthPanelProps {
@@ -9,7 +9,11 @@ interface AuthPanelProps {
   busy: boolean
 }
 
+type AuthMode = 'login' | 'register'
+
 export default function AuthPanel({ session, onRegister, onLogin, onLogout, busy }: AuthPanelProps) {
+  const [authMode, setAuthMode] = useState<AuthMode>('login')
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
   const [registerForm, setRegisterForm] = useState<RegisterRequest>({
     username: '',
     password: '',
@@ -21,14 +25,50 @@ export default function AuthPanel({ session, onRegister, onLogin, onLogout, busy
 
   const submitRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    await onRegister(registerForm)
-    setRegisterForm((previous) => ({ ...previous, password: '' }))
+    try {
+      await onRegister(registerForm)
+      setRegisterForm((previous) => ({ ...previous, password: '' }))
+      setAuthMode('login')
+    } catch {
+      // 오류 메시지는 상위(App)에서 플래시로 표시한다.
+    }
   }
 
   const submitLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    await onLogin(loginForm)
-    setLoginForm((previous) => ({ ...previous, password: '' }))
+    try {
+      await onLogin(loginForm)
+      setLoginForm((previous) => ({ ...previous, password: '' }))
+      setIsAuthModalOpen(false)
+    } catch {
+      // 오류 메시지는 상위(App)에서 플래시로 표시한다.
+    }
+  }
+
+  useEffect(() => {
+    if (!isAuthModalOpen) {
+      return
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !busy) {
+        setIsAuthModalOpen(false)
+      }
+    }
+
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [busy, isAuthModalOpen])
+
+  const openAuthModal = (mode: AuthMode) => {
+    setAuthMode(mode)
+    setIsAuthModalOpen(true)
+  }
+
+  const closeAuthModal = () => {
+    if (!busy) {
+      setIsAuthModalOpen(false)
+    }
   }
 
   return (
@@ -46,62 +86,112 @@ export default function AuthPanel({ session, onRegister, onLogin, onLogout, busy
           </button>
         </div>
       ) : (
-        <>
-          <form className="stack-form" onSubmit={(event) => void submitRegister(event)}>
-            <h3>회원가입</h3>
-            <label>
-              아이디
-              <input
-                type="text"
-                value={registerForm.username}
-                placeholder="traffic_operator"
-                onChange={(event) => setRegisterForm((previous) => ({ ...previous, username: event.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              비밀번호
-              <input
-                type="password"
-                value={registerForm.password}
-                placeholder="최소 8자 이상"
-                onChange={(event) => setRegisterForm((previous) => ({ ...previous, password: event.target.value }))}
-                minLength={8}
-                required
-              />
-            </label>
-            <button className="btn" type="submit" disabled={busy}>
-              회원가입
+        <div className="auth-entry">
+          <p className="muted">로그인/회원가입은 분리된 인증 창에서 진행합니다.</p>
+          <div className="auth-entry-actions">
+            <button className="btn" type="button" disabled={busy} onClick={() => openAuthModal('login')}>
+              로그인 열기
             </button>
-          </form>
+            <button className="btn secondary" type="button" disabled={busy} onClick={() => openAuthModal('register')}>
+              회원가입 열기
+            </button>
+          </div>
 
-          <form className="stack-form" onSubmit={(event) => void submitLogin(event)}>
-            <h3>로그인</h3>
-            <label>
-              아이디
-              <input
-                type="text"
-                value={loginForm.username}
-                placeholder="traffic_operator"
-                onChange={(event) => setLoginForm((previous) => ({ ...previous, username: event.target.value }))}
-                required
-              />
-            </label>
-            <label>
-              비밀번호
-              <input
-                type="password"
-                value={loginForm.password}
-                placeholder="비밀번호"
-                onChange={(event) => setLoginForm((previous) => ({ ...previous, password: event.target.value }))}
-                required
-              />
-            </label>
-            <button className="btn" type="submit" disabled={busy}>
-              로그인
-            </button>
-          </form>
-        </>
+          {isAuthModalOpen && (
+            <div className="auth-modal-backdrop" role="presentation" onClick={closeAuthModal}>
+              <section
+                className="auth-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label="인증 창"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="auth-modal-header">
+                  <h3>계정 인증</h3>
+                  <button className="icon-btn" type="button" onClick={closeAuthModal} disabled={busy} aria-label="인증 창 닫기">
+                    닫기
+                  </button>
+                </div>
+
+                <div className="auth-tabs" role="tablist" aria-label="인증 방식 선택">
+                  <button
+                    type="button"
+                    className={`auth-tab ${authMode === 'login' ? 'active' : ''}`}
+                    onClick={() => setAuthMode('login')}
+                    role="tab"
+                    aria-selected={authMode === 'login'}
+                  >
+                    로그인
+                  </button>
+                  <button
+                    type="button"
+                    className={`auth-tab ${authMode === 'register' ? 'active' : ''}`}
+                    onClick={() => setAuthMode('register')}
+                    role="tab"
+                    aria-selected={authMode === 'register'}
+                  >
+                    회원가입
+                  </button>
+                </div>
+
+                {authMode === 'login' ? (
+                  <form className="stack-form auth-form" onSubmit={(event) => void submitLogin(event)}>
+                    <label>
+                      아이디
+                      <input
+                        type="text"
+                        value={loginForm.username}
+                        placeholder="traffic_operator"
+                        onChange={(event) => setLoginForm((previous) => ({ ...previous, username: event.target.value }))}
+                        required
+                      />
+                    </label>
+                    <label>
+                      비밀번호
+                      <input
+                        type="password"
+                        value={loginForm.password}
+                        placeholder="비밀번호"
+                        onChange={(event) => setLoginForm((previous) => ({ ...previous, password: event.target.value }))}
+                        required
+                      />
+                    </label>
+                    <button className="btn" type="submit" disabled={busy}>
+                      로그인
+                    </button>
+                  </form>
+                ) : (
+                  <form className="stack-form auth-form" onSubmit={(event) => void submitRegister(event)}>
+                    <label>
+                      아이디
+                      <input
+                        type="text"
+                        value={registerForm.username}
+                        placeholder="traffic_operator"
+                        onChange={(event) => setRegisterForm((previous) => ({ ...previous, username: event.target.value }))}
+                        required
+                      />
+                    </label>
+                    <label>
+                      비밀번호
+                      <input
+                        type="password"
+                        value={registerForm.password}
+                        placeholder="최소 8자 이상"
+                        onChange={(event) => setRegisterForm((previous) => ({ ...previous, password: event.target.value }))}
+                        minLength={8}
+                        required
+                      />
+                    </label>
+                    <button className="btn secondary" type="submit" disabled={busy}>
+                      회원가입
+                    </button>
+                  </form>
+                )}
+              </section>
+            </div>
+          )}
+        </div>
       )}
     </article>
   )

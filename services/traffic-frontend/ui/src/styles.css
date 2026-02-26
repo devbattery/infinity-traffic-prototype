@@ -448,6 +448,95 @@ tbody tr:last-child td {
   background: var(--surface-strong);
 }
 
+.auth-entry {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-strong);
+}
+
+.auth-entry-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.auth-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(10, 24, 36, 0.4);
+  backdrop-filter: blur(3px);
+  animation: fadeInBackdrop 0.22s ease both;
+}
+
+.auth-modal {
+  width: min(460px, 92vw);
+  background: linear-gradient(120deg, rgba(255, 255, 255, 0.97) 0%, rgba(245, 251, 255, 0.94) 100%);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(4, 18, 28, 0.28);
+  padding: 18px;
+  animation: popIn 0.24s ease both;
+}
+
+.auth-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.auth-modal-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.icon-btn {
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink-700);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.icon-btn:hover:not(:disabled) {
+  background: #f3f8fb;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.auth-tab {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--ink-700);
+  border-radius: 10px;
+  padding: 9px 10px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.auth-tab.active {
+  background: linear-gradient(120deg, var(--teal) 0%, #149ba8 100%);
+  color: #fff;
+  border-color: rgba(15, 127, 138, 0.5);
+}
+
+.auth-form {
+  animation: fadeInUp 0.22s ease both;
+}
+
 .muted {
   margin: 0;
   color: var(--ink-500);
@@ -487,6 +576,28 @@ tbody tr:last-child td {
 
   to {
     transform: translateX(120%);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }
 
@@ -558,6 +669,10 @@ tbody tr:last-child td {
   .inline-controls {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .auth-entry-actions {
+    flex-direction: column;
   }
 
   .panel-title-row {
