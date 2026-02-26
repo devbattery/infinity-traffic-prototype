@@ -20,6 +20,11 @@
 
 ## 빠른 시작
 
+### 사전 요구사항
+
+- `JDK 17` 설치 및 `JAVA_HOME` 설정
+- Gradle은 반드시 저장소의 Wrapper(`./gradlew`) 사용
+
 ### 1) 빌드/테스트
 
 ```bash

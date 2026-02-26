@@ -79,7 +79,7 @@ class FrontendGatewayClient(
         }
 
     // 공통 HTTP 호출/에러 변환/JSON 파싱을 수행한다.
-    private fun <T> execute(
+    private fun <T : Any> execute(
         method: HttpMethod,
         path: String,
         payload: Any? = null,
@@ -107,18 +107,39 @@ class FrontendGatewayClient(
                 authorization?.let { headers.set(HttpHeaders.AUTHORIZATION, it) }
             }
 
-        return if (payload != null) {
-            requestSpec
-                .body(payload)
-                .exchange { _, response -> toResult(response.statusCode.is2xxSuccessful, response.statusCode.value(), response.body.bufferedReader().use { it.readText() }, parser) }
+        val result = if (payload != null) {
+            executeAndParse(
+                requestSpec = requestSpec.body(payload),
+                parser = parser,
+            )
         } else {
-            requestSpec
-                .exchange { _, response -> toResult(response.statusCode.is2xxSuccessful, response.statusCode.value(), response.body.bufferedReader().use { it.readText() }, parser) }
+            executeAndParse(
+                requestSpec = requestSpec,
+                parser = parser,
+            )
+        }
+
+        return checkNotNull(result) {
+            "게이트웨이 응답 파싱 결과가 null입니다. method=$method, path=$path"
         }
     }
 
     // HTTP 응답 바디를 성공/실패 규칙에 따라 도메인 값으로 변환한다.
-    private fun <T> toResult(isSuccess: Boolean, statusCode: Int, rawBody: String, parser: (String) -> T): T {
+    private fun <T : Any> executeAndParse(
+        requestSpec: RestClient.RequestHeadersSpec<*>,
+        parser: (String) -> T,
+    ): T? =
+        requestSpec.exchange { _, response ->
+            toResult(
+                isSuccess = response.statusCode.is2xxSuccessful,
+                statusCode = response.statusCode.value(),
+                rawBody = response.body.bufferedReader().use { it.readText() },
+                parser = parser,
+            )
+        }
+
+    // HTTP 응답 바디를 성공/실패 규칙에 따라 도메인 값으로 변환한다.
+    private fun <T : Any> toResult(isSuccess: Boolean, statusCode: Int, rawBody: String, parser: (String) -> T): T {
         if (isSuccess) {
             return parser(rawBody)
         }
